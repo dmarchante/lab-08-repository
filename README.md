@@ -4,7 +4,7 @@
 
 City Explorer backend app
 
-**Author**: David Marchante
+**Author**: David Marchante, MattBurger
 **Version**: 1.0.0 (increment the patch/fix version number if you make more commits past your first submission)
 
 ## Overview
@@ -33,10 +33,11 @@ From the terminal, run one of the following to make a local copy:
 
 ## Credits and Collaborations
 * David Marchante [dmarchante](https://github.com/dmarchante)
+* Matt Burger [dmarchante](https://github.com/mattburger)
 
 ## Time Estimation
 
-  Number and name of feature: Locations, Weather, and Errors
+  Number and name of feature: Set up tables, write to tables, and validate for data on tables
 
   Estimate of time needed to complete: 4 hours
 
@@ -47,4 +48,4 @@ From the terminal, run one of the following to make a local copy:
   Actual time needed to complete: 4 hours
 
 ## License:
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/stephenchu530/lab-06-back-end/blob/master/LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/dmarchante/lab-08-repository/blob/master/LICENSE)
