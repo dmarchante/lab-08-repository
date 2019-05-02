@@ -88,9 +88,9 @@ function searchToLatLong(query) {
 function getWeather(request, response) {
   const latitude = request.query.data.latitude;
   const longitude = request.query.data.longitude;
-  const formatted_query = request.query.data.formatted_query;
-  let sqlSelectLatitudeLongitude = `SELECT * FROM locations WHERE latitude = $1 AND longitude = $2 AND formatted_query = $3`;
-  let values = [latitude, longitude, formatted_query];
+  const search_query = request.query.data.search_query;
+  let sqlSelectLatitudeLongitude = `SELECT * FROM locations WHERE latitude = $1 AND longitude = $2 AND search_query = $3`;
+  let values = [latitude, longitude, search_query];
 
   return client.query(sqlSelectLatitudeLongitude, values)
     .then(() => {
@@ -100,8 +100,8 @@ function getWeather(request, response) {
         .then(result => {
           const weatherSummaries = result.body.daily.data.map(day => {
             let newWeather = new Weather(day);
-            let insertStatement = `INSERT INTO weather (forecast, formatted_date, formatted_query)  VALUES ($1, $2, $3)`;
-            let insertValues = [newWeather.forecast, newWeather.formatted_date, formatted_query];
+            let insertStatement = `INSERT INTO weather (forecast, formatted_date, search_query)  VALUES ($1, $2, $3)`;
+            let insertValues = [newWeather.forecast, newWeather.formatted_date, search_query];
 
             client.query(insertStatement, insertValues);
 
@@ -115,8 +115,8 @@ function getWeather(request, response) {
 }
 
 function getEvents(request, response) {
-  const eventLocation = request.query.data.formatted_query;
-  let sqlSelectFormattedQuery = `SELECT * FROM locations WHERE formatted_query = $1`;
+  const eventLocation = request.query.data.search_query;
+  let sqlSelectFormattedQuery = `SELECT * FROM locations WHERE search_query = $1`;
   let values = [eventLocation];
 
   return client.query(sqlSelectFormattedQuery,values)

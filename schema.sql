@@ -14,7 +14,7 @@ CREATE TABLE locations (
 CREATE TABLE weather (
   forecast VARCHAR(255),
   formatted_date DATE,
-  formatted_query VARCHAR(255)
+  search_query VARCHAR(255)
 );
 
 CREATE TABLE events (
@@ -22,5 +22,5 @@ CREATE TABLE events (
   event_name VARCHAR(255),
   event_date DATE,
   summary VARCHAR (255),
-  formatted_query VARCHAR(255)
+  search_query VARCHAR(255)
 );
