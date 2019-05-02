@@ -16,9 +16,7 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 
 // Database Setup
-// .env DATABASE_URL
-// const client = new pg.Client(process.env.DATABASE_URL);
-const client = new pg.Client('http://localhost:5431/city_explorer');
+const client = new pg.Client(process.env.DATABASE_URL);
 client.connect();
 
 // API Routes
@@ -75,7 +73,7 @@ function searchToLatLong(query) {
         return superagent.get(url)
           .then(res => {
             let newLocation = new Location(query, res);
-            let insertStatement = `INSERT INTO location (latitude, longitude, formatted_query, search_query) VALUES ($1, $2, $3, $4)`;
+            let insertStatement = `INSERT INTO location (search_query, formatted_query, latitude, longitude)  VALUES ($1, $2, $3, $4)`;
             let insertValues = [newLocation.latitude, newLocation.longitude, newLocation.formatted_query, newLocation.search_query];
 
             client.query(insertStatement, insertValues);
