@@ -12,13 +12,15 @@ CREATE TABLE locations (
 );
 
 CREATE TABLE weather (
-  forcast VARCHAR(255),
-  time_of_day DATE
+  forecast VARCHAR(255),
+  formatted_date DATE,
+  formatted_query VARCHAR(255)
 );
 
 CREATE TABLE events (
   link VARCHAR (255),
   event_name VARCHAR(255),
   event_date DATE,
-  summary VARCHAR (255)
+  summary VARCHAR (255),
+  formatted_query VARCHAR(255)
 );

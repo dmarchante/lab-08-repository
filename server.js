@@ -49,7 +49,7 @@ function Location(query, res) {
 
 function Weather(day) {
   this.forecast = day.summary;
-  this.time_of_day = new Date(day.time * 1000).toString().slice(0, 15);
+  this.formatted_date = new Date(day.time * 1000).toString().slice(0, 15);
 }
 
 function Event(event) {
@@ -69,6 +69,7 @@ function searchToLatLong(query) {
         return data.rows[0];
       } else {
         const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${query}&key=${process.env.GEOCODE_API_KEY}`;
+
         return superagent.get(url)
           .then(res => {
             let newLocation = new Location(query, res);
@@ -81,36 +82,55 @@ function searchToLatLong(query) {
           })
           .catch(error => handleError(error));
       }
-    })
-    .catch(error => handleError(error));
+    });
 }
 
 function getWeather(request, response) {
-  const url = `https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${request.query.data.latitude},${request.query.data.longitude}`;
+  const latitude = request.query.data.latitude;
+  const longitude = request.query.data.longitude;
+  const formatted_query = request.query.data.formatted_query;
+  let sqlSelectLatitudeLongitude = `SELECT * FROM locations WHERE latitude = $1 AND longitude = $2 AND formatted_query = $3`;
+  let values = [latitude, longitude, formatted_query];
 
-  return superagent.get(url)
-    .then(result => {
-      const weatherSummaries = result.body.daily.data.map(day => {
-        return new Weather(day);
-      });
+  return client.query(sqlSelectLatitudeLongitude, values)
+    .then(() => {
+      const url = `https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${values[0]},${values[1]}`;
 
-      response.send(weatherSummaries);
-    })
-    .catch(error => handleError(error, response));
+      return superagent.get(url)
+        .then(result => {
+          const weatherSummaries = result.body.daily.data.map(day => {
+            let newWeather = new Weather(day);
+            let insertStatement = `INSERT INTO weather (forecast, formatted_date, formatted_query)  VALUES ($1, $2, $3)`;
+            let insertValues = [newWeather.forecast, newWeather.formatted_date, formatted_query];
+
+            client.query(insertStatement, insertValues);
+
+            return newWeather;
+          });
+
+          response.send(weatherSummaries);
+        })
+        .catch(error => handleError(error, response));
+    });
 }
 
-
 function getEvents(request, response) {
-  const url = `https://www.eventbriteapi.com/v3/events/search?token=${process.env.EVENTBRITE_API_KEY}&location.address=${request.query.data.formatted_query}`;
+  const eventLocation = request.query.data.formatted_query;
+  let sqlSelectFormattedQuery = `SELECT * FROM locations WHERE formatted_query = $1`;
+  let values = [eventLocation];
 
-  return superagent.get(url)
-    .then(result => {
-      const events = result.body.events.map(eventData => {
-        const event = new Event(eventData);
-        return event;
-      });
+  return client.query(sqlSelectFormattedQuery,values)
+    .then(() => {
+      const url = `https://www.eventbriteapi.com/v3/events/search?token=${process.env.EVENTBRITE_API_KEY}&location.address=${values[0]}`;
 
-      response.send(events);
-    })
-    .catch(error => handleError(error, response));
+      return superagent.get(url)
+        .then(result => {
+          const events = result.body.events.map(eventData => {
+            let event = new Event(eventData);
+            return event;
+          });
+          response.send(events);
+        })
+        .catch(error => handleError(error, response));
+    });
 }
