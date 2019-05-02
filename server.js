@@ -86,31 +86,58 @@ function searchToLatLong(query) {
 }
 
 function getWeather(request, response) {
-  const url = `https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${request.query.data.latitude},${request.query.data.longitude}`;
+  let sqlStatement = `SELECT * FROM weather WHERE forecast = $1`;
 
-  superagent.get(url)
-    .then(result => {
-      const weatherSummaries = result.body.daily.data.map(day => {
-        return new Weather(day);
-      });
+  return client.query(sqlStatement/*,whatgoeshere*/)
+    .then(data => {
+      if(data.rowCount > 0){
+        return data.rows[0];
+      } else {
+        const url = `https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${request.query.data.latitude},${request.query.data.longitude}`;
+        superagent.get(url)
+        .then(result => {
+          const weatherSummaries = result.body.daily.data.map(day => {
+            return new Weather(day);
+          });
+          let insertStatement = `INSERT INTO weather (forecast, time_of_day)  VALUES ($1, $2)`;
+          //let insertValues = [newWeather.forecast, newWeather.time_of_day];
+          let insertValues = weatherSummaries.map(element =>{
+            return [element.forecast, element.time_of_day];
+          });
 
-      response.send(weatherSummaries);
-    })
-    .catch(error => handleError(error, response));
-}
+          for(let i = 0; i < insertValues.length; i++){
+            client.query(insertStatement, insertValues[1]);
+          }
+          response.send(weatherSummaries);
+          return weatherSummaries;
+        })
+        .catch(error => handleError(error, response));
+      }
+    });
+
+
+
 
 
 function getEvents(request, response) {
-  const url = `https://www.eventbriteapi.com/v3/events/search?token=${process.env.EVENTBRITE_API_KEY}&location.address=${request.query.data.formatted_query}`;
+  let sqlStatement = `SELECT * FROM events WHERE link = $1`;
 
-  superagent.get(url)
-    .then(result => {
-      const events = result.body.events.map(eventData => {
-        const event = new Event(eventData);
-        return event;
-      });
-
-      response.send(events);
-    })
-    .catch(error => handleError(error, response));
+  return client.query(sqlStatement,/*what goes here*/)
+    .then(data=> {
+      if (data.rows[0] > 0){
+        return data.rows[0];
+      }else{
+        const url = `https://www.eventbriteapi.com/v3/events/search?token=${process.env.EVENTBRITE_API_KEY}&location.address=${request.query.data.formatted_query}`;
+        superagent.get(url)
+          .then(result => {
+            const events = result.body.events.map(eventData => {
+              const event = new Event(eventData);
+              return event;
+            });
+      
+            response.send(events);
+          })
+          .catch(error => handleError(error, response));
+      }
+    });
 }
