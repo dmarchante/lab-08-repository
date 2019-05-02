@@ -49,12 +49,12 @@ function Location(query, res) {
 
 function Weather(day) {
   this.forecast = day.summary;
-  this.time = new Date(day.time * 1000).toString().slice(0, 15);
+  this.time_of_day = new Date(day.time * 1000).toString().slice(0, 15);
 }
 
 function Event(event) {
   this.link = event.url;
-  this.name = event.name.text;
+  this.event_name = event.name.text;
   this.event_date = new Date(event.start.local).toString().slice(0, 15);
   this.summary = event.summary;
 }
